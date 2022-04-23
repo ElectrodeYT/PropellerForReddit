@@ -1,0 +1,7 @@
+[Desktop Entry]
+_Name=Propeller for Reddit
+Exec=propeller %U -qmljsdebugger=port:3768,block
+Icon=assets/propeller.svg
+Terminal=false
+Type=Application
+X-Ubuntu-Touch=true

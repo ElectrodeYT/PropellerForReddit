@@ -1,0 +1,1 @@
+clickable --arch arm64

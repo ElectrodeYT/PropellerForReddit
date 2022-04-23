@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/assets"/>
+    <qresource prefix="/">
+        <file>propeller.svg</file>
+    </qresource>
+</RCC>

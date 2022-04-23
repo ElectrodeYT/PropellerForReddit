@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Main.qml</file>
+        <file>RedditPost.qml</file>
+        <file>PostsPage.qml</file>
+        <file>OpenedRedditPost.qml</file>
+        <file>js/posts-create.js</file>
+        <file>js/reddit-stuff.js</file>
+        <file>js/snoowrap.js</file>
+        <file>SearchPage.qml</file>
+        <file>SubredditSearchEntry.qml</file>
+        <file>PostsSearchPage.qml</file>
+        <file>SettingsPage.qml</file>
+        <file>LoginPage.qml</file>
+    </qresource>
+</RCC>

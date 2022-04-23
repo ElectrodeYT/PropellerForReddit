@@ -1,0 +1,15 @@
+{
+    "name": "propeller.alexanderrichards",
+    "description": "A simple Client for Reddit, designed to be simple to use, with a simple interface.",
+    "architecture": "@CLICK_ARCH@",
+    "title": "Propeller for Reddit",
+    "hooks": {
+        "propeller": {
+            "apparmor": "propeller.apparmor",
+            "desktop":  "propeller.desktop"
+        }
+    },
+    "version": "1.0.0",
+    "maintainer": "Alexander Richards <electrodeyt@gmail.com>",
+    "framework" : "@CLICK_FRAMEWORK@"
+}
