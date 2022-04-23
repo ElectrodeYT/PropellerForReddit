@@ -120,7 +120,7 @@ Page {
                         source: pageImage
                         fillMode: Image.PreserveAspectFit
                         asynchronous: true
-                        cache: false
+                        cache: true
                         verticalAlignment: Image.AlignTop
                         autoTransform: true
                         id: pageImageItem

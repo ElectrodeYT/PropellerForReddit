@@ -126,12 +126,12 @@ ColumnLayout {
             source: inView ? postThumbnail : ""
             fillMode: Image.PreserveAspectFit
             asynchronous: true
-            cache: false
+            cache: true
             verticalAlignment: Image.AlignTop
             autoTransform: true
             id: postImage
             anchors.fill: parent
-            playing: inView
+            onStatusChanged: playing = (status == AnimatedImage.Ready)
         }
         BusyIndicator {
             anchors.centerIn: parent
