@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0
 import QtMultimedia 5.12
 import Ubuntu.Components 1.3
-
+import RedditController 1.0
 import "."
 
 
@@ -29,6 +29,28 @@ Page {
 
     Component.onCompleted: {
         console.log("opened reddit post with id" + pageID);
+        RedditController.getCommentsFromPost(pageID);
+    }
+
+    Connections {
+        target: RedditController
+        onCommentsReceived: {
+            if(!active) { return; }
+            console.log("comments: " + comments + " dist: " + comments.dist);
+            var redditCommentComponent = Qt.createComponent("qrc:/Comment.qml");
+            if(redditCommentComponent.status !== Component.Ready) {
+                console.log("Error loading component: ", redditCommentComponent.errorString());
+                return;
+            }
+            for(var i = 0; i < comments.dist; i++) {
+                var redditCommentObject = redditCommentComponent.createObject(commentColumn, {
+                                                                               commentAuthor: comments.comments_name[i],
+                                                                               commentText: comments.comments[i]
+                });
+                console.log("create comment " + i + " " + redditCommentObject)
+            }
+            loadingProgressBar.enabled = false
+        }
     }
 
     MediaPlayer {
@@ -137,6 +159,12 @@ Page {
                     Layout.fillWidth: true
                     enabled: visible
                     visible: pageTextLabel.paintedHeight || pageTextLabel.paintedWidth
+                }
+
+                ColumnLayout {
+                    id: commentColumn
+                    spacing: units.gu(1)
+                    Layout.fillWidth: true
                 }
             }
         }

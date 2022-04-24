@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: propeller.alexanderrichards\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-23 20:49+0000\n"
+"POT-Creation-Date: 2022-04-24 17:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../qml/RedditPost.qml:60
+#: ../qml/RedditPost.qml:63
 msgid " - u/"
 msgstr ""
 

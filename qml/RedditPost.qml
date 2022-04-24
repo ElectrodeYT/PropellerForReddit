@@ -29,18 +29,21 @@ ColumnLayout {
     property int postThumbnailWidth: 1000
     property int postThumbnailHeight: 1000
 
+    property string postID: "default-post-id"
+
     property Flickable flickable
 
     Layout.alignment: Qt.AlignLeft //| Qt.AlignRight
 
-    property bool inView: ((scrollView.flickableItem.contentY + scrollView.height) >= y) && (scrollView.flickableItem.contentY < (y + height)) //|| ((scrollView.flickableItem.contentY + scrollView.height) >= y && (y + height) <= (scrollView.flickableItem.contentY + scrollView.height))
 
-
+    // Giant calculation to check if the post is currently in view
+    property bool inView: ((scrollView.flickableItem.contentY + scrollView.height) >= y) && (scrollView.flickableItem.contentY < (y + height))
 
     ToolSeparator {
         orientation: Qt.Horizontal
         Layout.fillWidth: true
     }
+    // Title & small image preview
     RowLayout {
         Layout.alignment: Qt.AlignLeft
         AnimatedImage {
@@ -102,6 +105,7 @@ ColumnLayout {
         elide: Text.ElideRight
         // width: Math.min(implicitWidth, (rowLayoutInPost.availableWidth - openPostButton.implicitWidth))
     }
+    // Text preview
     Label {
         text: postPreview
         Layout.fillWidth: true
@@ -112,6 +116,8 @@ ColumnLayout {
         enabled: postPreview !== ""
         visible: enabled
     }
+
+    // Image preview
     Item {
         Layout.fillWidth: true
         Layout.maximumWidth: postThumbnailWidth * 2
@@ -146,6 +152,11 @@ ColumnLayout {
         }
     }
 
+    // Vote container
+    Item {
+
+    }
+
     function openPost() {
         var openRedditPostComponent = Qt.createComponent("OpenedRedditPost.qml");
         if(openRedditPostComponent.status !== Component.Ready) {
@@ -163,7 +174,8 @@ ColumnLayout {
                                                                 "pageThumbnail": postThumbnail,
                                                                 "pageHasThumbnail": postHasThumbnail,
                                                                 "pageImageWidth": postThumbnailWidth,
-                                                                "pageImageHeight": postThumbnailHeight
+                                                                "pageImageHeight": postThumbnailHeight,
+                                                                "pageID": postID
                                                             } ));
     }
 

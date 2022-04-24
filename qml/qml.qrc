@@ -12,5 +12,6 @@
         <file>PostsSearchPage.qml</file>
         <file>SettingsPage.qml</file>
         <file>LoginPage.qml</file>
+        <file>Comment.qml</file>
     </qresource>
 </RCC>

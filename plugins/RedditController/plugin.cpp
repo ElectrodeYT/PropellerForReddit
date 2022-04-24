@@ -167,6 +167,30 @@ void RedditController::getMorePostsFromSubredditSearch(QString subreddit, QStrin
     connect(current_request, &Request::request_done, this, &RedditController::onPostsRequestReceived);
 }
 
+void RedditController::getCommentsFromPost(QString post_id) {
+    Q_ASSERT(isAuthed());
+    Q_ASSERT(!isBusy());
+    busy = true;
+    qDebug() << "getting comments from " + post_id;
+
+    // The code can contain "t3_" at the beginning (type identifer), so if it does we ax it
+    if(post_id.startsWith("t3_", Qt::CaseSensitive)) {
+        post_id.remove(0, 3);
+    }
+
+    // Construct the JSON url
+    QString url = "https://oauth.reddit.com/comments/" + post_id + ".json?limit=50&raw_json=1";
+    qDebug() << "comment url: " << url;
+    current_request = new Request(Request::RequestType::Normal, manager, this);
+    current_request->setAccessToken(access_token);
+    // current_request->setAccessToken("");
+    current_request->setURL(QUrl(url));
+    current_request->setHttpType(Request::HTTPType::GET);
+
+    current_request->send();
+    connect(current_request, &Request::request_done, this, &RedditController::onCommentsRequestReceived);
+}
+
 void RedditController::cancelRequest() {
     if(current_request) {
         current_request->cancelRequest();
@@ -444,6 +468,97 @@ void RedditController::onSubredditSearchRequestReceived(QNetworkReply* reply){
     }
     busy = false;
     emit subredditsSearchReceived(QVariant::fromValue(subreddits));
+}
+
+void RedditController::onCommentsRequestReceived(QNetworkReply* reply) {
+    qDebug() << "onCommentsRequestReceived() top";
+    RedditCommentsContainer comments;
+    if(!reply) {
+        qDebug() << "reddit request timed out";
+        emit postsReceived(QVariant::fromValue(comments));
+        busy = false;
+        return;
+    }
+    QString replyString = reply->readAll();
+    if(reply->error() != QNetworkReply::NoError) {
+        qDebug() << "reddit returned error when fetching comments";
+        qDebug() << "full log: ";
+        qDebug() << replyString;
+        emit postsReceived(QVariant::fromValue(comments));
+        busy = false;
+        return;
+    }
+    bool parse_ok;
+    const QVariantMap replyJson = QtJson::parse(replyString, parse_ok).toMap();
+    if(!parse_ok) {
+        qDebug() << "reddit didnt return valid JSON for comment request";
+        qDebug() << "full log: ";
+        qDebug() << replyString;
+        emit postsReceived(QVariant::fromValue(comments));
+        busy = false;
+        return;
+    }
+    if(replyJson.contains("error")) {
+        qDebug() << "reddit returned error for comment request: " << replyJson["error"].toString();
+        emit commentsReceived(QVariant::fromValue(comments));
+        busy = false;
+        return;
+    }
+
+    // Comments replies contain 2 listings
+    QVariantList listings = QtJson::parse(replyString).toList();
+    if(listings.count() != 2) {
+        qDebug() << "reddit didnt return json array for comment request";
+        qDebug() << "full log: ";
+        qDebug() << replyString;
+        emit postsReceived(QVariant::fromValue(comments));
+        busy = false;
+        return;
+    }
+    // We are only interrested in the second listing
+    // The first one is only a copy of the post
+    // TODO: maybe update the post with this listing?
+    QtJson::JsonObject comments_listing = listings[1].toMap();
+
+    // Check if this is a listing
+    if(!comments_listing.contains("kind") || comments_listing.value("kind").toString() != "Listing") {
+        qDebug() << "reddit didnt return valid listing for subreddit";
+        qDebug() << "full log: ";
+        qDebug() << replyString;
+        emit postsReceived(QVariant::fromValue(comments));
+        busy = false;
+        return;
+    }
+
+    QtJson::JsonObject data = comments_listing["data"].toMap();
+    comments.dist = data["dist"].toInt(&parse_ok);
+    // While comments do contain a "after" and a "dist" entry, they seem to be null at least most of the time
+    if(!data.contains("children")) {
+        qDebug() << "data does not contain children";
+    }
+    QtJson::JsonObject children = data["children"].toMap();
+
+    // Current UNIX timestamp
+    uint64_t unix_timestamp = QDateTime::currentSecsSinceEpoch();
+    int i = 0;
+    foreach(QVariant child, data["children"].toList()) {
+        QtJson::JsonObject comment_container = child.toMap();
+        if(comment_container["kind"].toString() == "more") {
+            qDebug() << "TODO: handle the more comments tag bit";
+            break;
+        }
+        QtJson::JsonObject data = comment_container["data"].toMap();
+        QString body = data["body_html"].toString();
+        QString author = "u/" + data["author"].toString();
+        qDebug() << author << " " << body;
+        comments.comments.push_back(body);
+        comments.comments_name.push_back(author);
+        i++;
+    }
+    comments.dist = i;
+    qDebug() << "amount of comments: " << comments.dist;
+    emit commentsReceived(QVariant::fromValue(comments));
+    busy = false;
 }
 
 void RedditController::onInternalRequestTimeout() {

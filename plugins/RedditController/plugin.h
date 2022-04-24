@@ -112,7 +112,6 @@ class RedditPostContainer {
     Q_PROPERTY(QVariantList posts_flair MEMBER posts_flair CONSTANT FINAL)
     Q_PROPERTY(int dist MEMBER dist CONSTANT FINAL);
 public:
-
     QString after = "";
     QVariantList posts;
     QVariantList posts_dec;
@@ -147,6 +146,21 @@ public:
 
 Q_DECLARE_METATYPE(RedditSubredditsSearchContainer)
 
+class RedditCommentsContainer {
+    Q_GADGET
+
+    Q_PROPERTY(QVariantList comments MEMBER comments CONSTANT FINAL)
+    Q_PROPERTY(QVariantList comments_name MEMBER comments_name CONSTANT FINAL)
+    Q_PROPERTY(int dist MEMBER dist CONSTANT FINAL);
+
+public:
+    QVariantList comments;
+    QVariantList comments_name;
+    int dist = 0;
+};
+
+Q_DECLARE_METATYPE(RedditCommentsContainer);
+
 class RedditController: public QObject {
     Q_OBJECT
 
@@ -162,6 +176,8 @@ public:
 
     Q_INVOKABLE void getPostsFromSubredditSearch(QString subreddit, QString search);
     Q_INVOKABLE void getMorePostsFromSubredditSearch(QString subreddit, QString search, QString after);
+
+    Q_INVOKABLE void getCommentsFromPost(QString post_id);
 
     Q_INVOKABLE bool handleOAuthLogin(const QString& url);
 
@@ -199,6 +215,7 @@ private slots:
     void onAccessTokenRefreshTimerFire();
     void onPostsRequestReceived(QNetworkReply* reply);
     void onSubredditSearchRequestReceived(QNetworkReply* reply);
+    void onCommentsRequestReceived(QNetworkReply* reply);
 
     void onInternalRequestTimeout();
 private:
