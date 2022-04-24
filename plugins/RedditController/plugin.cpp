@@ -210,6 +210,27 @@ QString RedditController::getBestThumbnail(QtJson::JsonObject json) {
     return json["source"].toMap()["url"].toString();
 }
 
+void RedditController::addComment(RedditCommentsContainer& comments, QtJson::JsonObject json, int depth) {
+    QString body = json["body_html"].toString();
+    QString author = "u/" + json["author"].toString();
+    qDebug() << author << " " << body;
+    comments.comments.push_back(body);
+    comments.comments_name.push_back(author);
+    comments.comments_depth.push_back(depth);
+    // Check if we have any replies
+    if(json.contains("replies")) {
+        foreach(QVariant child, json["replies"].toMap()["data"].toMap()["children"].toList()) {
+            QtJson::JsonObject comment_container = child.toMap();
+            if(comment_container["kind"].toString() == "more") {
+                qDebug() << "TODO: handle the more comments tag bit";
+                break;
+            }
+            QtJson::JsonObject data = comment_container["data"].toMap();
+            addComment(comments, data, depth + 1);
+        }
+    }
+}
+
 void RedditController::onPostsRequestReceived(QNetworkReply* reply) {
     qDebug() << "onPostsRequestReceived() top";
     RedditPostContainer posts;
@@ -540,7 +561,6 @@ void RedditController::onCommentsRequestReceived(QNetworkReply* reply) {
 
     // Current UNIX timestamp
     uint64_t unix_timestamp = QDateTime::currentSecsSinceEpoch();
-    int i = 0;
     foreach(QVariant child, data["children"].toList()) {
         QtJson::JsonObject comment_container = child.toMap();
         if(comment_container["kind"].toString() == "more") {
@@ -548,14 +568,9 @@ void RedditController::onCommentsRequestReceived(QNetworkReply* reply) {
             break;
         }
         QtJson::JsonObject data = comment_container["data"].toMap();
-        QString body = data["body_html"].toString();
-        QString author = "u/" + data["author"].toString();
-        qDebug() << author << " " << body;
-        comments.comments.push_back(body);
-        comments.comments_name.push_back(author);
-        i++;
+        addComment(comments, data, 0);
     }
-    comments.dist = i;
+    comments.dist = comments.comments.count();
     qDebug() << "amount of comments: " << comments.dist;
     emit commentsReceived(QVariant::fromValue(comments));
     busy = false;

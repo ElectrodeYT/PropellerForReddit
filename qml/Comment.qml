@@ -8,33 +8,42 @@ import Ubuntu.Components 1.3
 import "."
 
 
-ColumnLayout {
+RowLayout {
     property string commentAuthor: "u/default user"
     property string commentText: "default comment text"
-
+    property int commentDepth: 0
     Layout.fillWidth: true
-
-    Label {
-        Layout.fillWidth: true
-        text: commentAuthor
-        wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-        elide: Label.ElideRight
-        verticalAlignment: Label.AlignTop
-        horizontalAlignment: Label.AlignLeft
-        textSize: Label.Small
+    Repeater {
+        model: commentDepth
+        delegate: ToolSeparator{
+            orientation: Qt.Vertical
+            Layout.fillHeight: true
+            padding: 0
+        }
     }
 
-    Label {
-        Layout.fillWidth: true
-        text: commentText
-        wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-        elide: Label.ElideRight
-        verticalAlignment: Label.AlignTop
-        horizontalAlignment: Label.AlignLeft
-    }
+    ColumnLayout {
+        Label {
+            Layout.fillWidth: true
+            text: commentAuthor
+            wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+            elide: Label.ElideRight
+            verticalAlignment: Label.AlignTop
+            horizontalAlignment: Label.AlignLeft
+            textSize: Label.Small
+        }
 
-    ToolSeparator {
-        orientation: Qt.Horizontal
-        Layout.fillWidth: true
+        Label {
+            Layout.fillWidth: true
+            text: commentText
+            wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+            elide: Label.ElideRight
+            verticalAlignment: Label.AlignTop
+            horizontalAlignment: Label.AlignLeft
+        }
+        ToolSeparator {
+            orientation: Qt.Horizontal
+            Layout.fillWidth: true
+        }
     }
 }

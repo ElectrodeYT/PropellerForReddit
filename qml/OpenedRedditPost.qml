@@ -45,7 +45,8 @@ Page {
             for(var i = 0; i < comments.dist; i++) {
                 var redditCommentObject = redditCommentComponent.createObject(commentColumn, {
                                                                                commentAuthor: comments.comments_name[i],
-                                                                               commentText: comments.comments[i]
+                                                                               commentText: comments.comments[i],
+                                                                               commentDepth: comments.comments_depth[i]
                 });
                 console.log("create comment " + i + " " + redditCommentObject)
             }

@@ -151,11 +151,13 @@ class RedditCommentsContainer {
 
     Q_PROPERTY(QVariantList comments MEMBER comments CONSTANT FINAL)
     Q_PROPERTY(QVariantList comments_name MEMBER comments_name CONSTANT FINAL)
+    Q_PROPERTY(QVariantList comments_depth MEMBER comments_depth CONSTANT FINAL)
     Q_PROPERTY(int dist MEMBER dist CONSTANT FINAL);
 
 public:
     QVariantList comments;
     QVariantList comments_name;
+    QVariantList comments_depth;
     int dist = 0;
 };
 
@@ -220,6 +222,7 @@ private slots:
     void onInternalRequestTimeout();
 private:
     QString getBestThumbnail(QtJson::JsonObject json);
+    void addComment(RedditCommentsContainer& comments, QtJson::JsonObject json, int depth);
 
     QString access_token;
     QString refresh_token;
