@@ -9,7 +9,7 @@
             "desktop":  "propeller.desktop"
         }
     },
-    "version": "1.0.1",
+    "version": "1.0.2",
     "maintainer": "Alexander Richards <electrodeyt@gmail.com>",
     "framework" : "@CLICK_FRAMEWORK@"
 }

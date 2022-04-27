@@ -37,7 +37,7 @@ ColumnLayout {
 
 
     // Giant calculation to check if the post is currently in view
-    property bool inView: ((scrollView.flickableItem.contentY + scrollView.height) >= y) && (scrollView.flickableItem.contentY < (y + height))
+    property bool inView: ((scrollView.flickableItem.contentY + scrollView.height) >= (y - units.gu(24))) && (scrollView.flickableItem.contentY < (y + height + units.gu(24)))
 
     ToolSeparator {
         orientation: Qt.Horizontal

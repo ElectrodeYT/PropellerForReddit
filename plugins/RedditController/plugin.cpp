@@ -8,7 +8,7 @@
 #if defined (Q_WS_SIMULATOR)
     QString user_agent = "qt-simulator:propeller.alexanderrichards:v1.0.0-git"
 #else
-    QString user_agent = "propeller.alexanderrichards:v1.0.1 (Ubuntu Touch)";
+    QString user_agent = "propeller.alexanderrichards:v1.0.2 (Ubuntu Touch)";
 #endif
 
 //

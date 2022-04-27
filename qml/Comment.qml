@@ -15,11 +15,17 @@ RowLayout {
     Layout.fillWidth: true
     Repeater {
         model: commentDepth
-        delegate: ToolSeparator{
-            orientation: Qt.Vertical
+        delegate: Item {
             Layout.fillHeight: true
-            padding: 0
+            width: units.gu(1)
         }
+    }
+
+    ToolSeparator {
+        orientation: Qt.Vertical
+        Layout.fillHeight: true
+        enabled: commentDepth != 0
+        visible: enabled
     }
 
     ColumnLayout {

@@ -153,6 +153,13 @@ Page {
                         anchors.centerIn: parent
                         visible: pageImageItem.progress != 1
                     }
+                    ProgressBar {
+                        visible: (pageImageItem.progress != 1)
+                        value: pageImageItem.progress
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                    }
                 }
 
                 ToolSeparator {
@@ -161,6 +168,13 @@ Page {
                     enabled: visible
                     visible: pageTextLabel.paintedHeight || pageTextLabel.paintedWidth
                 }
+
+                Label {
+                    wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+                    Layout.fillWidth: true
+                    text: commentColumn.children.length + " comments: "
+                }
+
 
                 ColumnLayout {
                     id: commentColumn
