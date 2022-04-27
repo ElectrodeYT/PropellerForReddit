@@ -28,7 +28,6 @@ Page {
             console.log(url);
             var test = /^http:\/\/propeller\//
             if(test.test(url)) {
-                console.log("got redirected: " + url);
                 loginFailed = !RedditController.handleOAuthLogin(url);
                 webView.visible = false;
             }

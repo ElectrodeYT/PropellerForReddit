@@ -67,7 +67,6 @@ RedditController::RedditController() {
 
 bool RedditController::initReddit() {
     qDebug() << "init reddit!";
-    qDebug() << "saved refresh token: " << refresh_token;
     qmlRegisterInterface<RedditPostContainer>("RedditPostContainer");
     attemptAuth();
     return false;
@@ -632,7 +631,7 @@ void Request::cancelRequest() {
 void Request::on_request_done() {
     QByteArray remaining = reply->rawHeader("X-Ratelimit-Remaining");
     QByteArray reset = reply->rawHeader("X-Ratelimit-Reset");
-    qDebug("Reddit Rate Limit: Remaining: %s, Reset: %ss", remaining.constData(), reset.constData());
+    qDebug() << "Reddit Rate Limit: Remaining: " << remaining.constData() << " Reset: " << reset.constData();
 
     emit request_done(reply);
 }

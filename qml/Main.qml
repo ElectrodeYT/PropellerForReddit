@@ -83,7 +83,6 @@ MainView {
             }
         }
         onRefreshTokenChanged: {
-            console.log("changed refresh token: ", new_token);
             settings.refreshToken = new_token;
         }
     }

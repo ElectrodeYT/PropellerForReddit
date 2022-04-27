@@ -45,12 +45,6 @@ bool RedditController::handleOAuthLogin(const QString& url) {
     // Now we can read the code
     QString code = url_query.queryItemValue("code", QUrl::PrettyDecoded);
     if(code == "") { qDebug() << "code not existant"; return ""; }
-    qDebug() << "code: " << code;
-    // The code can contain "#_" at the end, so if it does we ax it
-    if(code.endsWith("#_", Qt::CaseSensitive)) {
-        code.remove(code.size() - 2, 2);
-    }
-    qDebug() << "truncated code: " << code;
     // We can now deauth, and reauth with the new oauth code
     authed = false;
 
@@ -81,8 +75,6 @@ void RedditController::onAccessTokenRequestDone(QNetworkReply* reply) {
         return;
     }
     const QString replyString = QString::fromUtf8(reply->readAll());
-    qDebug() << "full reply: ";
-    qDebug() << replyString;
 
     if(reply->error() != QNetworkReply::NoError) { return; }
 
@@ -111,10 +103,6 @@ void RedditController::onAccessTokenRequestDone(QNetworkReply* reply) {
     if(replyJson.contains("expires_in")) {
         access_token_refresh_timer->start(replyJson.value("expires_in").toUInt() * 999); // Slightly less so that we refresh before the token expires
         connect(access_token_refresh_timer, SIGNAL(timeout()), SLOT(onAccessTokenRefreshTimerFire()));
-    }
-    qDebug() << "Access token: " << access_token;
-    if(!refresh_token.isEmpty()) {
-        qDebug() << "Refresh token: " << refresh_token;
     }
     if(!access_token.isEmpty()) {
         authed = true;
