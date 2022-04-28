@@ -3,7 +3,7 @@
 // refreshed without it, and the refresh token has no expiry.
 // While we do send the "DO_NOT_TRACK_THIS_DEVICE" device_id (partly because i didnt want to figure out the best way to generate a ID, partly because privacy),
 // we have exactly 0 control over any tracking.
-// More importantly, because manually checking if we can use a feature, we ask for just about every permission an app can get.
+// More importantly, because manually checking if we can use a feature is annoying, we ask for just about every permission an app can get.
 // We dont actually use most of these, but it does mean that if someone got the refresh token it would basically be just as bad as if someone got your password.
 //
 // Versions before <1.0.2 accidentally printed them to the UT Logs, but even if they didnt, as they are stored plaintext, it is trivial to get them anyway (ignoring AppArmor, as you would need an app that can read other apps data)
