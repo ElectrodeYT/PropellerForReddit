@@ -3,8 +3,9 @@ import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0
 import QtMultimedia 5.12
+import QtGraphicalEffects 1.0
 import Ubuntu.Components 1.3
-
+import RedditController 1.0
 import "."
 
 
@@ -29,6 +30,10 @@ ColumnLayout {
     property int postThumbnailWidth: 1000
     property int postThumbnailHeight: 1000
 
+    property int pageScore: 420
+    property bool hasBeenUpvoted: false
+    property bool hasBeenDownvoted: false
+
     property string postID: "default-post-id"
 
     property Flickable flickable
@@ -39,10 +44,22 @@ ColumnLayout {
     // Giant calculation to check if the post is currently in view
     property bool inView: ((scrollView.flickableItem.contentY + scrollView.height) >= (y - units.gu(24))) && (scrollView.flickableItem.contentY < (y + height + units.gu(24)))
 
+    MouseArea {
+        anchors.fill: parent
+        onClicked: openPost()
+        // z: 999999
+    }
+
     ToolSeparator {
         orientation: Qt.Horizontal
         Layout.fillWidth: true
+        z: -9999
     }
+
+    Rectangle {
+
+    }
+
     // Title & small image preview
     RowLayout {
         Layout.alignment: Qt.AlignLeft
@@ -124,8 +141,11 @@ ColumnLayout {
         //Layout.preferredHeight: postImage.paintedHeight
         Layout.preferredHeight: (postThumbnailHeight / postThumbnailWidth) * width
         Layout.alignment: Qt.AlignTop | Qt.AlignVCenter
-        enabled: postIsImagePost
-        visible: postIsImagePost
+        enabled: postIsImagePost // && ((postThumbnail.indexOf(".gif")) !== -1)
+
+        Component.onCompleted: console.log(postThumbnail)
+
+        visible: postIsImagePost // && ((postThumbnail.indexOf(".gif")) !== -1)
         AnimatedImage {
             enabled: postIsImagePost && inView
             visible: enabled
@@ -152,9 +172,96 @@ ColumnLayout {
         }
     }
 
-    // Vote container
-    Item {
+    RowLayout {
+        Layout.alignment: Layout.Left
+        Item {
+            Layout.maximumWidth: units.gu(2)
+            Layout.maximumHeight: units.gu(2)
+            Layout.preferredWidth: units.gu(2)
+            Layout.preferredHeight: units.gu(2)
 
+            Image {
+                source: "qrc:/arrow.svg"
+                anchors.fill: parent
+                rotation: -90
+                id: upVoteImage
+                visible: false
+            }
+            ColorOverlay {
+                anchors.fill: upVoteImage
+                source: upVoteImage
+                rotation: -90
+                color: hasBeenUpvoted ? "red" : "darkred"
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    console.log("page upvote");
+                    if(hasBeenUpvoted) { hasBeenUpvoted = false; pageScore--; RedditController.submitCommentVote(postID, 0); }
+                    else if(hasBeenDownvoted) { hasBeenDownvoted = false; hasBeenUpvoted = true; pageScore += 2; RedditController.submitCommentVote(postID, 1); }
+                    else { hasBeenUpvoted = true; pageScore++; RedditController.submitCommentVote(postID, 1); }
+                }
+                z: 9999999
+            }
+        }
+
+        Label {
+            text: pageScore.toString()
+        }
+
+        Item {
+            Layout.maximumWidth: units.gu(2)
+            Layout.maximumHeight: units.gu(2)
+            Layout.preferredWidth: units.gu(2)
+            Layout.preferredHeight: units.gu(2)
+
+            Image {
+                source: "qrc:/arrow.svg"
+                anchors.fill: parent
+                rotation: -90
+                id: downVoteImage
+                visible: false
+            }
+            ColorOverlay {
+                anchors.fill: downVoteImage
+                source: downVoteImage
+                rotation: 90
+                color: hasBeenDownvoted ? "aqua" : "midnightblue"
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    console.log("page downvote");
+                    if(hasBeenDownvoted) { hasBeenDownvoted = false; pageScore++; RedditController.submitCommentVote(postID, 0); }
+                    else if(hasBeenUpvoted) { hasBeenUpvoted = false; hasBeenDownvoted = true; pageScore -= 2; RedditController.submitCommentVote(postID, -1); }
+                    else { hasBeenDownvoted = true; pageScore--; RedditController.submitCommentVote(postID, -1); }
+                }
+                z: 9999999
+            }
+        }
+    }
+
+    signal upvoteSignal()
+    signal downvoteSignal()
+    signal scoreSignal();
+
+    property var obj;
+
+    onUpvoteSignal: {
+        console.log("upvote signal");
+        hasBeenUpvoted = obj.hasBeenUpvoted;
+    }
+
+    onDownvoteSignal: {
+        console.log("downvote signal");
+        hasBeenDownvoted = obj.hasBeenDownvoted;
+    }
+
+    onScoreSignal: {
+        console.log("score signal");
+        pageScore = obj.pageScore;
     }
 
     function openPost() {
@@ -164,25 +271,26 @@ ColumnLayout {
             return;
         }
         console.log("postVideo: " + postVideo);
-        pageStack.push(openRedditPostComponent.createObject(null, {
-                                                                "pageTitle": postName,
-                                                                "pageText": postSelfText,
-                                                                "pageImage": postThumbnail,
-                                                                "pageHasImage": postIsImagePost,
-                                                                "pageVideo": postVideo,
-                                                                "pageHasVideo": postVideo !== "",
-                                                                "pageThumbnail": postThumbnail,
-                                                                "pageHasThumbnail": postHasThumbnail,
-                                                                "pageImageWidth": postThumbnailWidth,
-                                                                "pageImageHeight": postThumbnailHeight,
-                                                                "pageID": postID
-                                                            } ));
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: openPost()
-        z: 999999
+        obj = openRedditPostComponent.createObject(null, {
+                                                           "pageTitle": postName,
+                                                           "pageText": postSelfText,
+                                                           "pageImage": postThumbnail,
+                                                           "pageHasImage": postIsImagePost,
+                                                           "pageVideo": postVideo,
+                                                           "pageHasVideo": postVideo !== "",
+                                                           "pageThumbnail": postThumbnail,
+                                                           "pageHasThumbnail": postHasThumbnail,
+                                                           "pageImageWidth": postThumbnailWidth,
+                                                           "pageImageHeight": postThumbnailHeight,
+                                                           "pageID": postID,
+                                                           "pageScore": pageScore,
+                                                           "hasBeenUpvoted": hasBeenUpvoted,
+                                                           "hasBeenDownvoted": hasBeenDownvoted
+                                                       } );
+        obj.hasBeenUpvotedChanged.connect(upvoteSignal);
+        obj.hasBeenDownvotedChanged.connect(downvoteSignal);
+        obj.pageScoreChanged.connect(scoreSignal);
+        pageStack.push(obj);
     }
 }
 

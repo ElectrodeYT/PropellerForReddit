@@ -3,6 +3,7 @@ import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0
 import QtMultimedia 5.12
+import QtGraphicalEffects 1.0
 import Ubuntu.Components 1.3
 import RedditController 1.0
 import "."
@@ -25,6 +26,10 @@ Page {
     property string pageThumbnail: ""
     property bool pageHasThumbnail: false
 
+    property int pageScore: 420
+    property bool hasBeenUpvoted: false
+    property bool hasBeenDownvoted: false
+
     property string pageID: ""
 
     Component.onCompleted: {
@@ -46,7 +51,11 @@ Page {
                 var redditCommentObject = redditCommentComponent.createObject(commentColumn, {
                                                                                commentAuthor: comments.comments_name[i],
                                                                                commentText: comments.comments[i],
-                                                                               commentDepth: comments.comments_depth[i]
+                                                                               commentDepth: comments.comments_depth[i],
+                                                                               commentScore: comments.comments_score[i],
+                                                                               commentID: ("t1_" + comments.comments_id[i]),
+                                                                               hasBeenUpvoted: comments.comments_upvoted[i],
+                                                                               hasBeenDownvoted: comments.comments_downvoted[i]
                 });
                 console.log("create comment " + i + " " + redditCommentObject)
             }
@@ -131,6 +140,7 @@ Page {
                     visible: enabled
                 }
 
+                        // qDebug() << "post " <
                 Item {
                     Layout.fillWidth: true
                     Layout.maximumWidth: pageImageWidth * 2
@@ -159,6 +169,75 @@ Page {
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left
                         anchors.right: parent.right
+                    }
+                }
+
+                RowLayout {
+                    Layout.alignment: Layout.Left
+                    Item {
+                        Layout.maximumWidth: units.gu(2)
+                        Layout.maximumHeight: units.gu(2)
+                        Layout.preferredWidth: units.gu(2)
+                        Layout.preferredHeight: units.gu(2)
+
+                        Image {
+                            source: "qrc:/arrow.svg"
+                            anchors.fill: parent
+                            rotation: -90
+                            id: upVoteImage
+                            visible: false
+                        }
+                        ColorOverlay {
+                            anchors.fill: upVoteImage
+                            source: upVoteImage
+                            rotation: -90
+                            color: hasBeenUpvoted ? "red" : "darkred"
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                console.log("page upvote");
+                                if(hasBeenUpvoted) { hasBeenUpvoted = false; pageScore--; RedditController.submitCommentVote(postID, 0); }
+                                else if(hasBeenDownvoted) { hasBeenDownvoted = false; hasBeenUpvoted = true; pageScore += 2; RedditController.submitCommentVote(postID, 1); }
+                                else { hasBeenUpvoted = true; pageScore++; RedditController.submitCommentVote(postID, 1); }
+                            }
+                        }
+                    }
+
+                    Label {
+                        text: pageScore.toString()
+                    }
+
+                    Item {
+                        Layout.maximumWidth: units.gu(2)
+                        Layout.maximumHeight: units.gu(2)
+                        Layout.preferredWidth: units.gu(2)
+                        Layout.preferredHeight: units.gu(2)
+
+                        Image {
+                            source: "qrc:/arrow.svg"
+                            anchors.fill: parent
+                            rotation: -90
+                            id: downVoteImage
+                            visible: false
+                        }
+                        ColorOverlay {
+                            anchors.fill: downVoteImage
+                            source: downVoteImage
+                            rotation: 90
+                            color: hasBeenDownvoted ? "aqua" : "midnightblue"
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                console.log("page downvote");
+                                if(hasBeenDownvoted) { hasBeenDownvoted = false; pageScore++; RedditController.submitCommentVote(postID, 0); }
+                                else if(hasBeenUpvoted) { hasBeenUpvoted = false; hasBeenDownvoted = true; pageScore -= 2; RedditController.submitCommentVote(postID, -1); }
+                                else { hasBeenDownvoted = true; pageScore--; RedditController.submitCommentVote(postID, -1); }
+                            }
+                        }
                     }
                 }
 

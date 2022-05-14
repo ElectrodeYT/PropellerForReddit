@@ -110,6 +110,9 @@ class RedditPostContainer {
     Q_PROPERTY(QVariantList posts_timeagostring MEMBER posts_timeagostring CONSTANT FINAL)
     Q_PROPERTY(QVariantList posts_thumbnail_rect MEMBER posts_thumbnail_rect CONSTANT FINAL)
     Q_PROPERTY(QVariantList posts_flair MEMBER posts_flair CONSTANT FINAL)
+    Q_PROPERTY(QVariantList posts_score MEMBER posts_score CONSTANT FINAL)
+    Q_PROPERTY(QVariantList posts_upvoted MEMBER posts_upvoted CONSTANT FINAL)
+    Q_PROPERTY(QVariantList posts_downvoted MEMBER posts_downvoted CONSTANT FINAL)
     Q_PROPERTY(int dist MEMBER dist CONSTANT FINAL);
 public:
     QString after = "";
@@ -128,6 +131,9 @@ public:
     QVariantList posts_timeagostring;
     QVariantList posts_thumbnail_rect;
     QVariantList posts_flair;
+    QVariantList posts_score;
+    QVariantList posts_upvoted;
+    QVariantList posts_downvoted;
     int dist = 0;
 };
 
@@ -150,14 +156,26 @@ class RedditCommentsContainer {
     Q_GADGET
 
     Q_PROPERTY(QVariantList comments MEMBER comments CONSTANT FINAL)
+    Q_PROPERTY(QVariantList comments_id MEMBER comments_id CONSTANT FINAL)
     Q_PROPERTY(QVariantList comments_name MEMBER comments_name CONSTANT FINAL)
     Q_PROPERTY(QVariantList comments_depth MEMBER comments_depth CONSTANT FINAL)
+    Q_PROPERTY(QVariantList comments_score MEMBER comments_score CONSTANT FINAL)
+    Q_PROPERTY(QVariantList comments_ups MEMBER comments_ups CONSTANT FINAL)
+    Q_PROPERTY(QVariantList comments_downs MEMBER comments_downs CONSTANT FINAL)
+    Q_PROPERTY(QVariantList comments_upvoted MEMBER comments_upvoted CONSTANT FINAL)
+    Q_PROPERTY(QVariantList comments_downvoted MEMBER comments_downvoted CONSTANT FINAL)
     Q_PROPERTY(int dist MEMBER dist CONSTANT FINAL);
 
 public:
     QVariantList comments;
+    QVariantList comments_id;
     QVariantList comments_name;
     QVariantList comments_depth;
+    QVariantList comments_score;
+    QVariantList comments_ups;
+    QVariantList comments_downs;
+    QVariantList comments_upvoted;
+    QVariantList comments_downvoted;
     int dist = 0;
 };
 
@@ -180,6 +198,8 @@ public:
     Q_INVOKABLE void getMorePostsFromSubredditSearch(QString subreddit, QString search, QString after);
 
     Q_INVOKABLE void getCommentsFromPost(QString post_id);
+
+    Q_INVOKABLE void submitCommentVote(QString comment_id, int dir);
 
     Q_INVOKABLE bool handleOAuthLogin(const QString& url);
 
@@ -218,6 +238,7 @@ private slots:
     void onPostsRequestReceived(QNetworkReply* reply);
     void onSubredditSearchRequestReceived(QNetworkReply* reply);
     void onCommentsRequestReceived(QNetworkReply* reply);
+    void onVoteRequestReceived(QNetworkReply* reply);
 
     void onInternalRequestTimeout();
 private:

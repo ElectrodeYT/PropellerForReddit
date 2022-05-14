@@ -2,5 +2,6 @@
     <qresource prefix="/assets"/>
     <qresource prefix="/">
         <file>propeller.svg</file>
+        <file>arrow.svg</file>
     </qresource>
 </RCC>

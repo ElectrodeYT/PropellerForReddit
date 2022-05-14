@@ -6,9 +6,9 @@
 #include "reddit-auth.h"
 
 #if defined (Q_WS_SIMULATOR)
-    QString user_agent = "qt-simulator:propeller.alexanderrichards:v1.0.0-git"
+    QString user_agent = "qt-simulator:propeller.alexanderrichards:v1.0.3-git"
 #else
-    QString user_agent = "propeller.alexanderrichards:v1.0.2 (Ubuntu Touch)";
+    QString user_agent = "propeller.alexanderrichards:v1.0.3 (Ubuntu Touch)";
 #endif
 
 //
@@ -211,11 +211,23 @@ QString RedditController::getBestThumbnail(QtJson::JsonObject json) {
 
 void RedditController::addComment(RedditCommentsContainer& comments, QtJson::JsonObject json, int depth) {
     QString body = json["body_html"].toString();
+    QString id = json["id"].toString();
     QString author = "u/" + json["author"].toString();
-    qDebug() << author << " " << body;
+    int ups = json["ups"].toInt();
+    int downs = json["downs"].toInt();
+    int score = json["score"].toInt();
+    bool upvoted = json["likes"].toBool();
+    bool downvoted = !json["likes"].toBool();
+    if(json["likes"].isNull()) { upvoted = false; downvoted = false; }
     comments.comments.push_back(body);
+    comments.comments_id.push_back(id);
     comments.comments_name.push_back(author);
     comments.comments_depth.push_back(depth);
+    comments.comments_ups.push_back(ups);
+    comments.comments_downs.push_back(downs);
+    comments.comments_score.push_back(score);
+    comments.comments_upvoted.push_back(upvoted);
+    comments.comments_downvoted.push_back(downvoted);
     // Check if we have any replies
     if(json.contains("replies")) {
         foreach(QVariant child, json["replies"].toMap()["data"].toMap()["children"].toList()) {
@@ -317,6 +329,10 @@ void RedditController::onPostsRequestReceived(QNetworkReply* reply) {
         bool is_link_post = (post_hint == "link");
         bool has_thumbnail = is_link_post;
         QVector2D thumbnail_rect(0, 0);
+        int score = post["score"].toInt();
+        bool upvoted = post["likes"].toBool();
+        bool downvoted = !post["likes"].toBool();
+        if(post["likes"].isNull()) { upvoted = false; downvoted = false; }
         // qDebug() << "post " << i << " title: " << title << " self text: " << selftext;
 
         // If there are any images / if this post only has images then we simply prepend them to the selftext
@@ -401,6 +417,9 @@ void RedditController::onPostsRequestReceived(QNetworkReply* reply) {
         posts.posts_timeagostring.push_back(post_time_string);
         posts.posts_thumbnail_rect.push_back(thumbnail_rect);
         posts.posts_flair.push_back(flair);
+        posts.posts_score.push_back(score);
+        posts.posts_upvoted.push_back(upvoted);
+        posts.posts_downvoted.push_back(downvoted);
         i++;
     }
 
@@ -573,6 +592,26 @@ void RedditController::onCommentsRequestReceived(QNetworkReply* reply) {
     qDebug() << "amount of comments: " << comments.dist;
     emit commentsReceived(QVariant::fromValue(comments));
     busy = false;
+}
+
+void RedditController::submitCommentVote(QString comment_id, int dir) {
+    Request* vote_request = new Request(Request::RequestType::Normal, manager, this);
+    vote_request->setAccessToken(access_token);
+    vote_request->setURL(QUrl("https://oauth.reddit.com/api/vote"));
+    vote_request->setHttpType(Request::HTTPType::POST);
+    // vote_request->setDeviceId(device_id);
+    vote_request->addParameter("dir", QString::number(dir));
+    vote_request->addParameter("id", comment_id);
+    vote_request->addParameter("rank", "2");
+    vote_request->send();
+    connect(vote_request, &Request::request_done, this, &RedditController::onVoteRequestReceived);
+    qDebug() << "setting vote status of " << comment_id << " to " << QString::number(dir);
+}
+
+void RedditController::onVoteRequestReceived(QNetworkReply* reply) {
+    qDebug() << "Reply to vote request: ";
+    qDebug() << reply->readAll();
+    qDebug() << reply->error();
 }
 
 void RedditController::onInternalRequestTimeout() {

@@ -98,7 +98,10 @@ Page {
                                                                             postThumbnailWidth: posts.posts_thumbnail_rect[i].x,
                                                                             postThumbnailHeight: posts.posts_thumbnail_rect[i].y,
                                                                             postID: posts.posts_id[i],
-                                                                            postFlair: posts.posts_flair[i]
+                                                                            postFlair: posts.posts_flair[i],
+                                                                            pageScore: posts.posts_score[i],
+                                                                            hasBeenUpvoted: posts.posts_upvoted[i],
+                                                                            hasBeenDownvoted: posts.posts_downvoted[i]
                 });
             }
             loadingProgressBar.enabled = false;

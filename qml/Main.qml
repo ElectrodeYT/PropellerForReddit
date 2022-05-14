@@ -29,6 +29,18 @@ MainView {
         }
     }
 
+    ToolTip {
+        id: infoBanner
+        x: parent.width / 2 - width / 2
+        y: parent.height - 150
+
+        function show(text) {
+            infoBanner.timeout = 3000
+            infoBanner.text = text
+            infoBanner.visible = true
+        }
+    }
+
     PageStack {
         id: pageStack
 
@@ -68,6 +80,7 @@ MainView {
                 done = true;
                 console.log("attempting to open postspage");
                 pageStack.push(Qt.resolvedUrl("PostsPage.qml"));
+                infoBanner.show("Connected to Reddit");
             }
         }
         onRequestTimedOut: {
